@@ -13,15 +13,29 @@ import shutil
 
 app = Flask(__name__)
 
-# FFmpeg path - Update this path to your ffmpeg location
-FFMPEG_PATH = r"C:\Users\thaid\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe"
+# FFmpeg path handling for both local and production environments
+def get_ffmpeg_path():
+    # Check if running on Render (production)
+    if os.environ.get('RENDER'):
+        # On Render, ffmpeg should be available in PATH
+        return 'ffmpeg'
+    else:
+        # Local development path
+        return r"C:\Users\thaid\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe"
 
 # Check if ffmpeg is installed
 def check_ffmpeg():
     try:
-        if os.path.exists(FFMPEG_PATH):
-            subprocess.run([FFMPEG_PATH, '-version'], capture_output=True, check=True)
+        ffmpeg_path = get_ffmpeg_path()
+        if os.environ.get('RENDER'):
+            # On Render, just check if ffmpeg is in PATH
+            subprocess.run(['which', 'ffmpeg'], capture_output=True, check=True)
             return True
+        else:
+            # Local development check
+            if os.path.exists(ffmpeg_path):
+                subprocess.run([ffmpeg_path, '-version'], capture_output=True, check=True)
+                return True
         return False
     except (subprocess.SubprocessError, FileNotFoundError):
         return False
@@ -37,14 +51,15 @@ def convert_audio_to_wav(input_path, output_path=None):
     """Convert any audio format to wav format"""
     try:
         if not check_ffmpeg():
-            raise RuntimeError(f"ffmpeg not found at {FFMPEG_PATH}. Please check the path.")
+            raise RuntimeError("ffmpeg not found. Please ensure ffmpeg is installed and available in PATH.")
         
         if output_path is None:
             output_path = input_path.rsplit('.', 1)[0] + '.wav'
             
         # Use ffmpeg to convert audio
+        ffmpeg_path = get_ffmpeg_path()
         subprocess.run([
-            FFMPEG_PATH, '-i', input_path,
+            ffmpeg_path, '-i', input_path,
             '-acodec', 'pcm_s16le',
             '-ar', '22050',
             '-ac', '1',
@@ -91,7 +106,7 @@ def welcome():
 @app.route('/main')
 def main():
     if not check_ffmpeg():
-        return render_template('index.html', error=f"ffmpeg not found at {FFMPEG_PATH}. Please check the path.")
+        return render_template('index.html', error=f"ffmpeg not found at {get_ffmpeg_path()}. Please check the path.")
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
@@ -100,7 +115,7 @@ def predict():
         return jsonify({'error': 'No audio file'}), 400
     
     if not check_ffmpeg():
-        return jsonify({'error': f'ffmpeg not found at {FFMPEG_PATH}. Please check the path.'}), 500
+        return jsonify({'error': f'ffmpeg not found at {get_ffmpeg_path()}. Please check the path.'}), 500
     
     temp_input = None
     temp_wav = None

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
+            min-height: 100vh;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            color: #1a1a1a;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .nav-tabs {
+            border: none;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            margin: 0 0.5rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            color: #1a1a1a;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            border: none;
+            color: #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 135, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            border: none;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .alert {
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+
+        .alert-info {
+            background: rgba(0, 123, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffffff;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ffffff;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #ffffff;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            padding: 12px 20px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            box-shadow: none;
+        }
+
+        .form-control::file-selector-button {
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin-right: 10px;
+        }
+
+        #result {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        #result h4 {
+            color: #00ff87;
+            margin-bottom: 1rem;
+        }
+
+        .recording-guidelines {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .recording-guidelines h5 {
+            color: #60efff;
+            margin-bottom: 1rem;
+        }
+
+        .recording-guidelines ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .recording-guidelines li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .recording-guidelines li:before {
+            content: "•";
+            color: #00ff87;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h2>Nhận diện cảm xúc qua giọng nói</h2>
+                    </div>
+                    <div class="card-body">
+                        {% if error %}
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                        {% else %}
+                        <!-- Tab Navigation -->
+                        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="record-tab" data-bs-toggle="tab" data-bs-target="#record" type="button" role="tab">
+                                    <i class="fas fa-microphone"></i> Ghi âm
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">
+                                    <i class="fas fa-upload"></i> Upload File
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Record Tab -->
+                            <div class="tab-pane fade show active" id="record" role="tabpanel">
+                                <div class="recording-status mb-4">
+                                    <div id="status" class="alert alert-info">Sẵn sàng ghi âm</div>
+                                </div>
+                                
+                                <div class="controls mb-4 text-center">
+                                    <button id="record" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-microphone"></i> Bắt đầu ghi âm
+                                    </button>
+                                    <button id="stop" class="btn btn-danger btn-lg" disabled>
+                                        <i class="fas fa-stop"></i> Dừng ghi âm
+                                    </button>
+                                    <button id="download" class="btn btn-success btn-lg" disabled>
+                                        <i class="fas fa-download"></i> Tải xuống
+                                    </button>
+                                </div>
+
+                                <div class="recording-guidelines">
+                                    <h5><i class="fas fa-info-circle"></i> Hướng dẫn ghi âm:</h5>
+                                    <ul>
+                                        <li>Giữ khoảng cách 15-20cm từ microphone</li>
+                                        <li>Ghi âm trong môi trường yên tĩnh</li>
+                                        <li>Nói rõ ràng và với âm lượng vừa phải</li>
+                                        <li>Tránh tiếng ồn xung quanh</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Upload Tab -->
+                            <div class="tab-pane fade" id="upload" role="tabpanel">
+                                <div class="upload-status mb-4">
+                                    <div id="upload-status" class="alert alert-info">Chọn file âm thanh để phân tích</div>
+                                </div>
+                                
+                                <div class="upload-controls mb-4">
+                                    <form id="upload-form" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <input type="file" class="form-control" id="audio-file" accept="audio/*">
+                                        </div>
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-upload"></i> Phân tích
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Result Container -->
+                        <div class="result-container">
+                            <div id="result" class="alert alert-success" style="display: none;">
+                                <h4><i class="fas fa-chart-bar"></i> Kết quả phân tích:</h4>
+                                <p id="emotion-result"></p>
+                                <p id="confidence-result"></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Khởi tạo particles
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: {
+                    value: 0.5,
+                    random: false,
+                    anim: { enable: false }
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                    anim: { enable: false }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#ffffff',
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: { enable: true, mode: 'repulse' },
+                    onclick: { enable: true, mode: 'push' },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioContext;
+        let analyser;
+        let microphone;
+        let silenceTimer;
+        let isRecording = false;
+        const SILENCE_THRESHOLD = -45; // dB
+        const NOISE_THRESHOLD = 0; // dB
+        const SILENCE_DURATION = 1500; // ms
+        const MIN_RECORDING_DURATION = 1000; // ms
+        let recordingStartTime = 0;
+        let hasDetectedSound = false;
+
+        const recordButton = document.getElementById('record');
+        const stopButton = document.getElementById('stop');
+        const downloadButton = document.getElementById('download');
+        const statusDiv = document.getElementById('status');
+        const uploadStatusDiv = document.getElementById('upload-status');
+        const resultDiv = document.getElementById('result');
+        const emotionResult = document.getElementById('emotion-result');
+        const confidenceResult = document.getElementById('confidence-result');
+        const uploadForm = document.getElementById('upload-form');
+
+        // Recording functionality
+        recordButton.onclick = async function() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        channelCount: 1,
+                        sampleRate: 22050
+                    } 
+                });
+                
+                // Set up audio analysis
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+                analyser.fftSize = 2048;
+                
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+                
+                mediaRecorder.start();
+                audioChunks = [];
+                isRecording = true;
+                recordingStartTime = Date.now();
+                hasDetectedSound = false;
+                
+                // Start monitoring audio levels
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                let silenceStart = null;
+                
+                function checkAudioLevel() {
+                    if (!isRecording) return;
+                    
+                    analyser.getByteFrequencyData(dataArray);
+                    const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                    const db = 20 * Math.log10(average / 255);
+                    
+                    // Kiểm tra nếu đã ghi âm đủ thời gian tối thiểu
+                    const recordingDuration = Date.now() - recordingStartTime;
+                    
+                    if (db > SILENCE_THRESHOLD) {
+                        hasDetectedSound = true;
+                        silenceStart = null;
+                    } else if (hasDetectedSound && recordingDuration > MIN_RECORDING_DURATION) {
+                        if (!silenceStart) {
+                            silenceStart = Date.now();
+                        } else if (Date.now() - silenceStart > SILENCE_DURATION) {
+                            stopRecording();
+                            statusDiv.className = 'alert alert-danger';
+                            statusDiv.textContent = 'Không phát hiện được âm thanh! Vui lòng kiểm tra microphone và thử lại.';
+                            return;
+                        }
+                    }
+                    
+                    // Chỉ kiểm tra tạp âm sau khi đã ghi âm được một khoảng thời gian
+                    if (recordingDuration > MIN_RECORDING_DURATION && db > NOISE_THRESHOLD) {
+                        stopRecording();
+                        statusDiv.className = 'alert alert-danger';
+                        statusDiv.textContent = 'Phát hiện tạp âm quá lớn! Vui lòng ghi âm trong môi trường yên tĩnh hơn.';
+                        return;
+                    }
+                    
+                    requestAnimationFrame(checkAudioLevel);
+                }
+                
+                checkAudioLevel();
+                
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+                
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+                statusDiv.className = 'alert alert-warning';
+                statusDiv.textContent = 'Đang ghi âm...';
+                resultDiv.style.display = 'none';
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                let errorMessage = 'Không thể truy cập microphone! ';
+                
+                if (err.name === 'NotAllowedError') {
+                    errorMessage += 'Vui lòng cho phép truy cập microphone trong trình duyệt.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage += 'Không tìm thấy microphone. Vui lòng kiểm tra kết nối.';
+                } else if (err.name === 'NotReadableError') {
+                    errorMessage += 'Microphone đang được sử dụng bởi ứng dụng khác.';
+                } else {
+                    errorMessage += err.message;
+                }
+                
+                statusDiv.className = 'alert alert-danger';
+                statusDiv.textContent = errorMessage;
+            }
+        };
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Clean up audio context
+                if (audioContext) {
+                    audioContext.close();
+                }
+                if (microphone) {
+                    microphone.disconnect();
+                }
+                
+                recordButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        }
+
+        stopButton.onclick = function() {
+            stopRecording();
+            mediaRecorder.onstop = async function() {
+                // Kiểm tra xem có phát hiện được âm thanh không
+                if (!hasDetectedSound) {
+                    statusDiv.className = 'alert alert-danger';
+                    statusDiv.textContent = 'Không phát hiện được âm thanh! Vui lòng thử lại.';
+                    recordButton.disabled = false;
+                    stopButton.disabled = true;
+                    return;
+                }
+
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'audio.webm');
+
+                // Enable download button and create download link
+                downloadButton.disabled = false;
+                const audioUrl = URL.createObjectURL(audioBlob);
+                downloadButton.onclick = function() {
+                    const a = document.createElement('a');
+                    a.href = audioUrl;
+                    a.download = 'recording.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+
+                statusDiv.className = 'alert alert-info';
+                statusDiv.textContent = 'Đang xử lý...';
+
+                try {
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+
+                    emotionResult.textContent = `Cảm xúc: ${result.emotion}`;
+                    confidenceResult.textContent = `Độ tin cậy: ${(result.confidence * 100).toFixed(2)}%`;
+                    resultDiv.style.display = 'block';
+                    statusDiv.className = 'alert alert-success';
+                    statusDiv.textContent = 'Hoàn thành!';
+                } catch (err) {
+                    console.error('Error:', err);
+                    statusDiv.className = 'alert alert-danger';
+                    statusDiv.textContent = `Lỗi: ${err.message}`;
+                }
+            };
+        };
+
+        // File upload functionality
+        uploadForm.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('audio-file');
+            if (!fileInput.files.length) {
+                uploadStatusDiv.className = 'alert alert-danger';
+                uploadStatusDiv.textContent = 'Vui lòng chọn file âm thanh!';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('audio', file);
+
+            uploadStatusDiv.className = 'alert alert-info';
+            uploadStatusDiv.textContent = 'Đang xử lý...';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                emotionResult.textContent = `Cảm xúc: ${result.emotion}`;
+                confidenceResult.textContent = `Độ tin cậy: ${(result.confidence * 100).toFixed(2)}%`;
+                resultDiv.style.display = 'block';
+                uploadStatusDiv.className = 'alert alert-success';
+                uploadStatusDiv.textContent = 'Hoàn thành!';
+            } catch (err) {
+                console.error('Error:', err);
+                uploadStatusDiv.className = 'alert alert-danger';
+                uploadStatusDiv.textContent = `Lỗi: ${err.message}`;
+            }
+        };
+    </script>
+</body>
+</html> 

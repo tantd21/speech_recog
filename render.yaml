@@ -5,8 +5,12 @@ services:
     buildCommand: |
       apt-get update && apt-get install -y ffmpeg
       pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --timeout 300 --workers 2 --threads 4 --worker-class gthread
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-    healthCheckPath: / 
+    healthCheckPath: /
+    plan: standard
+    scaling:
+      minInstances: 1
+      maxInstances: 1 
